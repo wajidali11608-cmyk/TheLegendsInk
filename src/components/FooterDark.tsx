@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, Check, Send, ShieldCheck, Loader2 } from 'lucide-react';
+import { ArrowUpRight, Check, Send, ShieldCheck, Loader2, ArrowUp } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { submitNewsletterSubscription } from '../utils/newsletterService';
 
@@ -34,10 +34,10 @@ export const FooterDark: React.FC<FooterDarkProps> = ({
       setIsSubscribed(true);
 
       confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.9 },
-        colors: ['#C59E3F', '#FBF9F5', '#B8860B']
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.95 },
+        colors: ['#C5A059', '#FAF9F5', '#8E7128']
       });
 
       setEmail('');
@@ -51,207 +51,193 @@ export const FooterDark: React.FC<FooterDarkProps> = ({
   };
 
   return (
-    <footer className="w-full bg-[#0F1012] text-[#FBF9F5] border-t border-[rgba(255,255,255,0.12)] select-none relative overflow-hidden">
-      <div className="max-w-[1920px] mx-auto relative z-10">
+    <footer className="w-full bg-[#0D0E12] text-[#FAF9F5] border-t-2 border-[#C5A059] select-none relative overflow-hidden">
+      {/* Subtle warm golden ambient backdrop glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-24 bg-[#C5A059]/[0.04] rounded-full blur-3xl pointer-events-none" />
 
-        {/* Top Brand Banner in Footer with Logo from PDF */}
-        <div className="px-8 lg:px-16 py-12 border-b border-[rgba(255,255,255,0.1)] flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center space-x-6">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-8 lg:px-16 py-6 sm:py-10 relative z-10">
+
+        {/* ━━━ TOP MASTHEAD BRAND STRIP (Compact & Distinguished) ━━━ */}
+        <div className="flex flex-col sm:flex-row items-center justify-between pb-6 border-b border-white/10 gap-4">
+          <div className="flex items-center space-x-3 text-center sm:text-left">
             <img
-              src="/logo.png"
-              alt="The Legends Ink Logo"
-              className="h-16 md:h-20 w-auto object-contain filter brightness-110"
+              src="/tli-seal-badge.png"
+              alt="The Legends Ink Crest"
+              className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-full ring-1 ring-[#C5A059]/60 bg-black/40 flex-shrink-0"
             />
             <div>
-              <h3 className="font-luxury font-black text-xl md:text-2xl uppercase tracking-[0.15em] text-white">
-                THE LEGENDS INK
-              </h3>
-              <p className="font-editorial italic text-sm text-[#C59E3F]">
-                Ink That Speaks The Truth • Published from Bandipora & Printed in Srinagar
+              <div className="flex items-center space-x-2 justify-center sm:justify-start">
+                <h3 className="font-headline font-black text-sm sm:text-base uppercase tracking-[0.18em] text-[#FAF9F5]">
+                  THE LEGENDS INK
+                </h3>
+                <span className="text-[#C5A059] font-mono text-[9px] tracking-widest font-bold">
+                  MONTHLY
+                </span>
+              </div>
+              <p className="font-cursive text-sm sm:text-base text-[#D4AF37] leading-tight">
+                Ink That Speaks The Truth. For a Better, Informed Society.
               </p>
             </div>
           </div>
 
-          <button
-            onClick={onOpenPdfReader}
-            className="px-8 py-3.5 bg-[#C59E3F] hover:bg-amber-400 text-[#0F1012] font-bold text-xs uppercase tracking-widest transition-all shadow-lg flex items-center space-x-2"
-          >
-            <span>Read Magazine PDF (Free)</span>
-            <ArrowUpRight className="w-4 h-4" />
-          </button>
+          <div className="flex items-center space-x-2.5 w-full sm:w-auto">
+            <button
+              onClick={onOpenPdfReader}
+              className="flex-1 sm:flex-initial px-4 py-2 bg-[#C5A059] hover:bg-[#D4AF37] text-[#0D0E12] text-[10.5px] font-bold uppercase tracking-[0.16em] rounded-xs transition-colors flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer"
+            >
+              <span>Read Full PDF</span>
+              <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+
+            <button
+              onClick={scrollToTop}
+              title="Back to top"
+              className="px-3 py-2 bg-white/5 hover:bg-white/15 border border-white/15 text-white/80 hover:text-white text-[10.5px] font-mono uppercase tracking-wider rounded-xs transition-colors flex items-center space-x-1 cursor-pointer"
+            >
+              <span>Top</span>
+              <ArrowUp className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Three Columns Matrix: FOLLOW | ENTER YOUR E-MAIL | LEGAL */}
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[rgba(255,255,255,0.1)] border-b border-[rgba(255,255,255,0.1)]">
+        {/* ━━━ THREE COMPACT COLUMNS ━━━ */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 py-6 border-b border-white/10">
 
-          {/* Column 1: DISPATCHES & SOCIAL */}
-          <div className="p-8 lg:p-12 flex flex-col justify-between min-h-[260px]">
-            <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <span className="w-2 h-2 rounded-full bg-[#C59E3F]" />
-                <h4 className="font-sans font-bold text-xs tracking-[0.25em] uppercase text-white">
-                  EDITORIAL CHANNELS
-                </h4>
-              </div>
-              <ul className="space-y-3 text-xs font-sans tracking-wider text-white/70">
-                {[
-                  { name: "X (Twitter) Editorial", href: "#twitter" },
-                  { name: "Instagram Dispatch", href: "#instagram" },
-                  { name: "LinkedIn Publication Desk", href: "#linkedin" },
-                  { name: "YouTube Investigative Channel", href: "#youtube" },
-                  { name: "WhatsApp Reader Network", href: "#whatsapp" }
-                ].map((item) => (
-                  <li key={item.name}>
-                    <a
-                      href={item.href}
-                      className="group flex items-center justify-between hover:text-[#C59E3F] transition-colors py-1"
-                    >
-                      <span>{item.name}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-[#C59E3F] opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
+          {/* Column 1: Editorial Channels */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-1.5 text-[10px] font-mono tracking-[0.2em] uppercase text-[#C5A059] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span>EDITORIAL CHANNELS</span>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-white/10 text-[10px] font-sans tracking-widest text-white/40 uppercase">
-              PUBLISHED FROM BANDIPORA • PRINTED IN SRINAGAR
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { name: "X (Twitter)", href: "#twitter" },
+                { name: "Instagram", href: "#instagram" },
+                { name: "LinkedIn", href: "#linkedin" },
+                { name: "YouTube", href: "#youtube" },
+                { name: "WhatsApp", href: "#whatsapp" }
+              ].map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="px-2.5 py-1 bg-white/5 hover:bg-white/12 border border-white/10 hover:border-[#C5A059]/40 text-white/75 hover:text-[#D4AF37] text-[10px] font-sans tracking-wide rounded-xs transition-colors"
+                >
+                  {item.name} ↗
+                </a>
+              ))}
+            </div>
+
+            <div className="pt-2 text-[9px] font-mono tracking-wider text-white/40 uppercase">
+              PUBLISHED FROM BANDIPORA • PRINTED IN SRINAGAR, J&amp;K
             </div>
           </div>
 
-          {/* Column 2: THE WEEKLY DISPATCH */}
-          <div className="p-8 lg:p-12 flex flex-col justify-between min-h-[260px]">
-            <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <h4 className="font-sans font-bold text-xs tracking-[0.25em] uppercase text-white">
-                  THE WEEKLY INK DISPATCH
-                </h4>
-              </div>
-              <p className="text-xs text-white/70 font-sans leading-relaxed">
-                Receive curated Valley investigative briefs, upcoming print edition previews, and historical archives directly to your inbox every Friday evening.
-              </p>
-
-              <form onSubmit={handleNewsletterSubmit} className="mt-6">
-                <div className="relative flex items-center border-b-2 border-white/20 focus-within:border-[#C59E3F] pb-2 transition-colors">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    required
-                    className="w-full bg-transparent text-sm font-sans text-white placeholder-white/40 focus:outline-none pr-8"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    aria-label="Subscribe to dispatch"
-                    className="p-1.5 text-white hover:text-[#C59E3F] transition-colors focus:outline-none disabled:opacity-50"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-[#C59E3F]" />
-                    ) : isSubscribed ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-                {isSubscribed && (
-                  <div className="mt-2 text-xs font-sans text-[#C59E3F] tracking-wide animate-in fade-in space-y-1">
-                    <div className="flex items-center space-x-1.5">
-                      <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                      <span>
-                        Subscribed! {subscribedEmail} is registered
-                        {isSynced ? ' (synced to Google Sheets)' : ''}.
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <div className="mt-2.5 text-[10px] font-mono text-white/50 flex items-center justify-between">
-                  <span>Editorial Desk:</span>
-                  <a 
-                    href="mailto:thelegendsink@gmail.com?subject=The Weekly Ink Dispatch Inquiry" 
-                    className="text-[#C59E3F] hover:underline"
-                  >
-                    thelegendsink@gmail.com
-                  </a>
-                </div>
-              </form>
+          {/* Column 2: Compact Weekly Dispatch */}
+          <div className="space-y-2.5 bg-white/[0.02] p-3 rounded-xs border border-white/06">
+            <div className="flex items-center space-x-1.5 text-[10px] font-mono tracking-[0.2em] uppercase text-[#C5A059] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span>THE WEEKLY INK DISPATCH</span>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between text-[10px] font-sans tracking-widest text-white/40 uppercase">
-              <span className="flex items-center space-x-1">
+            <p className="text-[11px] text-white/60 font-sans leading-relaxed">
+              Curated investigative briefs &amp; print edition previews to your inbox every Friday.
+            </p>
+
+            <form onSubmit={handleNewsletterSubmit} className="relative mt-2">
+              <div className="flex items-center bg-white/5 border border-white/15 focus-within:border-[#C5A059] rounded-xs px-2.5 py-1.5 transition-colors">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your email address..."
+                  required
+                  className="w-full bg-transparent text-xs font-sans text-white placeholder-white/35 focus:outline-none pr-2"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  aria-label="Subscribe"
+                  className="p-1 text-[#C5A059] hover:text-white transition-colors disabled:opacity-50 cursor-pointer flex-shrink-0"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : isSubscribed ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+
+              {isSubscribed && (
+                <div className="mt-1.5 text-[10px] font-sans text-[#D4AF37] flex items-center space-x-1 animate-in fade-in">
+                  <Check className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                  <span>Subscribed! {subscribedEmail} is registered{isSynced ? ' (synced)' : ''}.</span>
+                </div>
+              )}
+            </form>
+
+            <div className="flex items-center justify-between text-[9px] font-mono text-white/45 pt-1">
+              <span>Editorial Desk:</span>
+              <a href="mailto:thelegendsink24×7@gmail.com" className="text-[#C5A059] hover:underline">
+                thelegendsink24×7@gmail.com
+              </a>
+            </div>
+          </div>
+
+          {/* Column 3: Legal, Press Council & Board */}
+          <div className="space-y-2.5">
+            <div className="flex items-center space-x-1.5 text-[10px] font-mono tracking-[0.2em] uppercase text-[#C5A059] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059]" />
+              <span>LEGAL &amp; PCI CHARTER</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5 text-[10.5px] font-sans text-white/70">
+              {[
+                { label: "Terms of Publication", topic: "terms" },
+                { label: "Reader Privacy", topic: "privacy" },
+                { label: "PCI Ethics Code", topic: "ethics" },
+                { label: "Dispute Protocol", topic: "disputes" }
+              ].map((item) => (
+                <button
+                  key={item.topic}
+                  onClick={() => onOpenLegal(item.topic)}
+                  className="text-left py-1 px-2 rounded-xs bg-white/5 hover:bg-white/10 hover:text-[#D4AF37] transition-colors truncate cursor-pointer"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-2 flex items-center justify-between border-t border-white/08 text-[9px] font-mono text-white/40">
+              <span className="flex items-center space-x-1 text-white/60">
                 <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                <span>INDEPENDENT PUBLIC JOURNALISM</span>
+                <span>PCI COMPLIANT</span>
               </span>
               <button
                 onClick={onOpenMasthead}
-                className="text-[#C59E3F] hover:underline"
+                className="text-[#C5A059] hover:underline uppercase tracking-wider cursor-pointer"
               >
-                EDITORIAL BOARD ↗
+                EDITORIAL BOARD [↗]
               </button>
             </div>
           </div>
 
-          {/* Column 3: LEGAL & ETHICS */}
-          <div className="p-8 lg:p-12 flex flex-col justify-between min-h-[260px]">
-            <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <span className="w-2 h-2 rounded-full bg-[#C59E3F]" />
-                <h4 className="font-sans font-bold text-xs tracking-[0.25em] uppercase text-white">
-                  LEGAL & PCI CHARTER
-                </h4>
-              </div>
-              <ul className="space-y-3 text-xs font-sans tracking-wider text-white/70">
-                {[
-                  { label: "Terms of Publication & Subscription", topic: "terms" },
-                  { label: "Privacy Policy & Reader Safeguards", topic: "privacy" },
-                  { label: "Press Council Code of Journalistic Ethics", topic: "ethics" },
-                  { label: "Dispute Resolution & Legal Representation", topic: "disputes" }
-                ].map((item) => (
-                  <li key={item.topic}>
-                    <button
-                      onClick={() => onOpenLegal(item.topic)}
-                      className="group flex items-center justify-between w-full hover:text-[#C59E3F] transition-colors py-1 text-left"
-                    >
-                      <span>{item.label}</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 text-[#C59E3F] opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-8 pt-4 border-t border-white/10 text-[10px] font-sans tracking-wide text-[#C59E3F]/80 uppercase leading-relaxed">
-              "All disputes subject to the jurisdiction of Srinagar Courts only."
-            </div>
-          </div>
-
         </div>
 
-        {/* Bottom Bar: © 2026 THE LEGENDS INK | ALL RIGHTS RESERVED */}
-        <div className="py-6 px-8 md:px-16 flex flex-col md:flex-row items-center justify-between text-xs font-sans tracking-[0.2em] text-white/70 uppercase space-y-4 md:space-y-0">
+        {/* ━━━ MICRO BOTTOM BAR ━━━ */}
+        <div className="pt-5 flex flex-col sm:flex-row items-center justify-between text-[9.5px] font-mono text-white/45 tracking-wider uppercase gap-2 text-center sm:text-left">
           <div>
-            © 2026 THE LEGENDS INK MONTHLY • ALL RIGHTS RESERVED
+            &copy; 2026 THE LEGENDS INK MONTHLY &bull; ALL RIGHTS RESERVED
+          </div>
+
+          <div className="text-[#D4AF37]/75">
+            "All disputes subject to the jurisdiction of Srinagar Courts only."
           </div>
 
           <div>
-            <button
-              onClick={scrollToTop}
-              className="font-headline font-bold text-xs md:text-sm tracking-[0.25em] text-white hover:text-[#C59E3F] transition-colors flex items-center space-x-1.5"
-            >
-              <span>THE LEGENDS INK MONTHLY</span>
-              <span>↑</span>
-            </button>
-          </div>
-
-          <div>
-            <button
-              onClick={onOpenPdfReader}
-              className="text-[#C59E3F] hover:text-white transition-colors font-bold tracking-[0.2em]"
-            >
-              READ FULL PDF
-            </button>
+            ISSN: 2583-9985 &bull; RNI REGISTERED
           </div>
         </div>
 

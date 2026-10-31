@@ -16,6 +16,7 @@ import { MagazinePdfReaderModal } from './components/MagazinePdfReaderModal';
 import { EditorialCMSModal } from './components/EditorialCMSModal';
 import { MastheadTeamModal } from './components/MastheadTeamModal';
 import { SlideOverDrawer } from './components/SlideOverDrawer';
+import { MobileEditorialFeed } from './components/MobileEditorialFeed';
 import { Preloader } from './components/Preloader';
 import { Article, MAGAZINE_DETAILS } from './data/magazineContent';
 import { getInitialArticles, saveArticlesToCMS } from './utils/cmsStorage';
@@ -202,64 +203,82 @@ export default function App() {
           </div>
         )}
 
-        {/* 4. HERO CAROUSEL FRAME (Top Breaking Investigations & Extracted Headlines) */}
-        <HeroCarousel
-          articles={filteredArticles}
-          onOpenArticle={handleOpenArticle}
-        />
+        {/* ─── DESKTOP EDITORIAL LAYOUT (MD & UP) — 100% UNCHANGED FOR PC ─── */}
+        <div className="hidden md:block">
+          {/* 4. HERO CAROUSEL FRAME (Top Breaking Investigations & Extracted Headlines) */}
+          <HeroCarousel
+            articles={filteredArticles}
+            onOpenArticle={handleOpenArticle}
+          />
 
-        {/* 5. FULL-WIDTH SECTION TITLE BANNER (Swiss Minimalist) */}
-        <SectionTitleBanner
-          title={activeCategory === 'Home' ? "THE EDITORIAL DOSSIER" : `${activeCategory.toUpperCase()} DOSSIER`}
-          tagline={activeCategory === 'Home'
-            ? "INDEPENDENT INVESTIGATIVE INQUIRY • PUBLIC ACCOUNTABILITY • ETHICAL JOURNALISM"
-            : `CURATED INVESTIGATIVE REPORTING FROM JAMMU & KASHMIR`}
-        />
+          {/* 5. FULL-WIDTH SECTION TITLE BANNER (Swiss Minimalist) */}
+          <SectionTitleBanner
+            title={activeCategory === 'Home' ? "THE EDITORIAL DOSSIER" : `${activeCategory.toUpperCase()} DOSSIER`}
+            tagline={activeCategory === 'Home'
+              ? "INDEPENDENT INVESTIGATIVE INQUIRY • PUBLIC ACCOUNTABILITY • ETHICAL JOURNALISM"
+              : `CURATED INVESTIGATIVE REPORTING FROM JAMMU & KASHMIR`}
+          />
 
-        {/* 6. FIVE-COLUMN EDITORIAL GRID (Dynamic CMS Headlines, Top Investigations, Ground Reports) */}
-        <FiveColumnEditorialGrid
-          articles={articles}
-          onOpenArticle={handleOpenArticle}
-        />
+          {/* 6. FIVE-COLUMN EDITORIAL GRID (Dynamic CMS Headlines, Top Investigations, Ground Reports) */}
+          <FiveColumnEditorialGrid
+            articles={articles}
+            onOpenArticle={handleOpenArticle}
+          />
 
-        {/* 7. PRINT EDITION SHOWCASE (Highlighting Active Issue, Auto-Cover & PDF) */}
-        <PrintEditionShowcase
-          onOpenPdfReader={() => setIsPdfReaderOpen(true)}
-          onOpenCMS={() => setIsCMSOpen(true)}
-          pdfUrl={activePdfUrl}
-          coverImage={activeIssue?.coverImage || '/october-2026-cover.png'}
-          issueTitle={activeIssue?.issueLabel || 'OCTOBER 2026'}
-          pageCount={activeIssue?.pageCount || 68}
-          archivedIssues={archivedIssues}
-          activeIssueId={activeIssue?.id}
-          onSwitchIssue={handleSwitchIssue}
-        />
+          {/* 7. PRINT EDITION SHOWCASE (Highlighting Active Issue, Auto-Cover & PDF) */}
+          <PrintEditionShowcase
+            onOpenPdfReader={() => setIsPdfReaderOpen(true)}
+            onOpenCMS={() => setIsCMSOpen(true)}
+            pdfUrl={activePdfUrl}
+            coverImage={activeIssue?.coverImage || '/october-2026-cover.png'}
+            issueTitle={activeIssue?.issueLabel || 'OCTOBER 2026'}
+            pageCount={activeIssue?.pageCount || 68}
+            archivedIssues={archivedIssues}
+            activeIssueId={activeIssue?.id}
+            onSwitchIssue={handleSwitchIssue}
+          />
 
-        {/* 8. CURATED TOPIC DOSSIERS (Browse Social Issues, National, Medical, Education, Culture) */}
-        <TopicDossierGrid
-          articles={articles}
-          onOpenArticle={handleOpenArticle}
-          onSelectCategory={setActiveCategory}
-        />
+          {/* 8. CURATED TOPIC DOSSIERS (Browse Social Issues, National, Medical, Education, Culture) */}
+          <TopicDossierGrid
+            articles={articles}
+            onOpenArticle={handleOpenArticle}
+            onSelectCategory={setActiveCategory}
+          />
 
-        {/* 9. DARK SPLIT FEATURE (The Founding Editorial Creed by Parvaiz Ahmad Reshi) */}
-        <DarkSplitFeature onOpenManifesto={() => setIsMastheadOpen(true)} />
+          {/* 9. DARK SPLIT FEATURE (The Founding Editorial Creed by Parvaiz Ahmad Reshi) */}
+          <DarkSplitFeature onOpenManifesto={() => setIsMastheadOpen(true)} />
 
-        {/* 10. HORIZONTAL ACCORDION TIMELINE (Complete 2026 Archive and Issue previews) */}
-        <AccordionTimeline
-          onOpenIssueReader={() => setIsPdfReaderOpen(true)}
-          onOpenArchive={() => setIsDrawerOpen(true)}
-          archivedIssues={archivedIssues}
-          activeIssueId={activeIssue?.id}
-          onSwitchIssue={handleSwitchIssue}
-        />
+          {/* 10. HORIZONTAL ACCORDION TIMELINE (Complete 2026 Archive and Issue previews) */}
+          <AccordionTimeline
+            onOpenIssueReader={() => setIsPdfReaderOpen(true)}
+            onOpenArchive={() => setIsDrawerOpen(true)}
+            archivedIssues={archivedIssues}
+            activeIssueId={activeIssue?.id}
+            onSwitchIssue={handleSwitchIssue}
+          />
 
-        {/* 11. OPEN DIGITAL ACCESS & PDF SECTION (Read Free, Download PDF, Open CMS) */}
-        <PublicPdfAccessSection
-          onOpenPdfReader={() => setIsPdfReaderOpen(true)}
-          onOpenCMS={() => setIsCMSOpen(true)}
-          pdfUrl={activePdfUrl}
-        />
+          {/* 11. OPEN DIGITAL ACCESS & PDF SECTION (Read Free, Download PDF, Open CMS) */}
+          <PublicPdfAccessSection
+            onOpenPdfReader={() => setIsPdfReaderOpen(true)}
+            onOpenCMS={() => setIsCMSOpen(true)}
+            pdfUrl={activePdfUrl}
+          />
+        </div>
+
+        {/* ─── SPECIALIZED LUXURY MOBILE EXPERIENCE (< MD) — COMPACT, ZERO DUPLICATES ─── */}
+        <div className="block md:hidden">
+          <MobileEditorialFeed
+            articles={filteredArticles}
+            onOpenArticle={handleOpenArticle}
+            activeIssue={activeIssue}
+            archivedIssues={archivedIssues}
+            onSwitchIssue={handleSwitchIssue}
+            onOpenPdfReader={() => setIsPdfReaderOpen(true)}
+            onOpenCMS={() => setIsCMSOpen(true)}
+            onOpenManifesto={() => setIsMastheadOpen(true)}
+            pdfUrl={activePdfUrl}
+          />
+        </div>
       </main>
 
       {/* 12. DARK FOOTER (Channels, Newsletter Dispatch, Masthead, Public Archive) */}
@@ -277,6 +296,7 @@ export default function App() {
       {activeArticle && (
         <ArticleModal
           article={activeArticle}
+          allArticles={articles}
           onClose={handleCloseArticle}
           onSelectArticle={handleOpenArticle}
         />
@@ -302,7 +322,7 @@ export default function App() {
         isOpen={isCMSOpen}
         onClose={() => setIsCMSOpen(false)}
         articles={articles}
-        onUpdateArticles={(updated) => setArticles(updated)}
+        onUpdateArticles={(updated: Article[]) => setArticles(updated)}
         onUpdatePdfIssue={handleCMSPublishIssue}
         currentPdfTitle={activeIssue?.title || "The Legends Ink — October 2026 Issue"}
         currentCoverImage={activeIssue?.coverImage || "/october-2026-cover.png"}

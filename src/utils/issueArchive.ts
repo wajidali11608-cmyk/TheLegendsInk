@@ -3,6 +3,7 @@
 // so that switching between months (e.g. October, November) preserves the full archive.
 
 import { Article, ARTICLES } from '../data/magazineContent';
+import { fetchLiveActiveIssueFromRemote, fetchLiveArchivedIssuesFeed } from './liveSyncService';
 
 const DB_NAME = 'magzine_portal_db';
 const DB_VERSION = 2;
@@ -159,27 +160,39 @@ export async function getActiveIssueId(): Promise<string | null> {
 
 export async function listArchivedIssues(): Promise<ArchivedIssue[]> {
   try {
-    const db = await openDB();
-    const records = await new Promise<ArchivedIssueRecord[]>((resolve, reject) => {
-      const tx = db.transaction(ISSUES_STORE, 'readonly');
-      const store = tx.objectStore(ISSUES_STORE);
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
+    // 1. Check remote live issues feed
+    const remoteFeed = await fetchLiveArchivedIssuesFeed();
 
-    const parsed: ArchivedIssue[] = records.map(({ pdfBuffer: _buf, pdfType: _type, ...rest }) => rest);
-
-    // Ensure baseline October 2026 is always present in archive if not already recorded
-    const hasOctober = parsed.some(
-      (i) => i.id === DEFAULT_OCTOBER_ID || i.monthYear.toLowerCase().includes('october')
-    );
-    if (!hasOctober) {
-      parsed.push(DEFAULT_OCTOBER_ISSUE);
+    // 2. Check local browser IndexedDB
+    let localParsed: ArchivedIssue[] = [];
+    try {
+      const db = await openDB();
+      const records = await new Promise<ArchivedIssueRecord[]>((resolve, reject) => {
+        const tx = db.transaction(ISSUES_STORE, 'readonly');
+        const store = tx.objectStore(ISSUES_STORE);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+      localParsed = records.map(({ pdfBuffer: _buf, pdfType: _type, ...rest }) => rest);
+    } catch {
+      // IndexedDB might be unavailable or empty
     }
 
-    // Sort newest uploaded first
-    return parsed.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+    // Merge unique issues by id or title
+    const issueMap = new Map<string, ArchivedIssue>();
+    issueMap.set(DEFAULT_OCTOBER_ID, DEFAULT_OCTOBER_ISSUE);
+
+    remoteFeed.forEach((item) => {
+      if (item && item.id) issueMap.set(item.id, item);
+    });
+
+    localParsed.forEach((item) => {
+      if (item && item.id) issueMap.set(item.id, item);
+    });
+
+    const combined = Array.from(issueMap.values());
+    return combined.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
   } catch {
     return [DEFAULT_OCTOBER_ISSUE];
   }
@@ -191,6 +204,20 @@ export async function loadIssueFromArchive(
   id: string
 ): Promise<{ issue: ArchivedIssue; blobUrl: string } | null> {
   try {
+    // Check remote feed first if matching id
+    try {
+      const remoteFeed = await fetchLiveArchivedIssuesFeed();
+      const foundRemote = remoteFeed.find((i) => i.id === id);
+      if (foundRemote) {
+        const url = foundRemote.fileName?.startsWith('http')
+          ? foundRemote.fileName
+          : `/issues/${foundRemote.fileName || 'current-issue.pdf'}`;
+        return { issue: foundRemote, blobUrl: url };
+      }
+    } catch {
+      // ignore
+    }
+
     // If it's the baseline October issue, check if custom record exists first; otherwise return default
     if (id === DEFAULT_OCTOBER_ID) {
       try {
@@ -254,14 +281,30 @@ export async function loadActiveIssue(): Promise<{
   issue: ArchivedIssue;
   blobUrl: string;
 } | null> {
+  // 1. Check if user explicitly selected a local issue in this browser
   const activeId = await getActiveIssueId();
-
-  if (activeId) {
+  if (activeId && activeId !== DEFAULT_OCTOBER_ID) {
     const loaded = await loadIssueFromArchive(activeId);
     if (loaded) return loaded;
   }
 
-  // If no active issue set yet, check if there are any uploaded issues
+  // 2. Check remote active issue (published to live site)
+  try {
+    const remoteActive = await fetchLiveActiveIssueFromRemote();
+    if (remoteActive) {
+      const remotePdfUrl = remoteActive.fileName?.startsWith('http')
+        ? remoteActive.fileName
+        : `/issues/${remoteActive.fileName || 'active-issue.pdf'}`;
+      return {
+        issue: remoteActive,
+        blobUrl: remotePdfUrl,
+      };
+    }
+  } catch {
+    // proceed
+  }
+
+  // 3. If no active issue set yet, check if there are any locally uploaded issues
   try {
     const db = await openDB();
     const records = await new Promise<ArchivedIssueRecord[]>((resolve, reject) => {
@@ -284,7 +327,7 @@ export async function loadActiveIssue(): Promise<{
     // fallback below
   }
 
-  // Baseline default: October 2026
+  // 4. Baseline default: October 2026
   return {
     issue: DEFAULT_OCTOBER_ISSUE,
     blobUrl: '/tli-october-2026.pdf',

@@ -52,8 +52,8 @@ export const SectionNavRow: React.FC<SectionNavRowProps> = ({
                     px-2.5 sm:px-3 md:px-3.5 lg:px-4 py-2 sm:py-2.5 rounded-[2px]
                     transition-all duration-300 ease-out focus:outline-none whitespace-nowrap
                     ${isActive
-                      ? 'bg-[#0E0F12]/[0.04] text-[#0E0F12]'
-                      : 'hover:bg-[#0E0F12]/[0.035] text-[#0E0F12]/60 hover:text-[#0E0F12]'
+                      ? 'bg-amber-500/10 text-[#121317] font-bold'
+                      : 'hover:bg-[#121317]/[0.035] text-[#121317]/65 hover:text-[#121317]'
                     }
                   `}
                 >
@@ -63,10 +63,10 @@ export const SectionNavRow: React.FC<SectionNavRowProps> = ({
                       text-[8.5px] sm:text-[9px] font-mono tracking-widest leading-none mb-1
                       transition-all duration-300
                       ${isActive
-                        ? 'text-[#C59E3F] font-bold'
+                        ? 'text-amber-800 font-bold'
                         : isHovered
-                          ? 'text-[#C59E3F] font-semibold -translate-y-0.5'
-                          : 'text-[#0E0F12]/35'
+                          ? 'text-amber-700 font-semibold -translate-y-0.5'
+                          : 'text-[#121317]/35'
                       }
                     `}
                   >
@@ -79,7 +79,7 @@ export const SectionNavRow: React.FC<SectionNavRowProps> = ({
                       text-[10.5px] sm:text-[11px] md:text-[11.5px] font-sans tracking-[0.16em] uppercase
                       transition-all duration-300
                       ${isActive
-                        ? 'font-bold text-[#0E0F12]'
+                        ? 'font-bold text-[#121317]'
                         : 'font-semibold'
                       }
                       ${isHovered && !isActive ? '-translate-y-[1px]' : ''}
@@ -94,17 +94,17 @@ export const SectionNavRow: React.FC<SectionNavRowProps> = ({
                       absolute bottom-0 left-0 right-0 h-[2px]
                       transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
                       ${isActive
-                        ? 'w-full bg-[#0E0F12]'
+                        ? 'w-full bg-amber-700'
                         : isHovered
-                          ? 'w-full bg-[#C59E3F] shadow-[0_0_8px_rgba(197,158,63,0.5)]'
-                          : 'w-0 left-1/2 right-1/2 bg-[#C59E3F]'
+                          ? 'w-full bg-amber-500/70 shadow-[0_0_8px_rgba(217,119,6,0.3)]'
+                          : 'w-0 left-1/2 right-1/2 bg-amber-500'
                       }
                     `}
                   />
 
                   {/* Active State Gold Registration Dot */}
                   {isActive && (
-                    <span className="absolute top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C59E3F]" />
+                    <span className="absolute top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-600" />
                   )}
                 </button>
               </li>

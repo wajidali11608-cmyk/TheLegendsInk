@@ -54,11 +54,26 @@ export const AccordionTimeline: React.FC<AccordionTimelineProps> = ({
   );
 
   return (
-    <section className="w-full bg-[#FBF9F5] border-b border-[rgba(15,16,18,0.12)] select-none">
+    <section className="w-full bg-[#FAF9F5] border-b border-[rgba(18,19,23,0.08)] select-none">
       <div className="w-full">
+        {/* Swiss Cursive Chronicle Bar */}
+        <div className="px-6 md:px-12 py-5 border-b border-[rgba(18,19,23,0.08)] flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#F5F2EA]/60">
+          <div className="flex items-center space-x-3">
+            <span className="w-2 h-2 rounded-full bg-[#8E7128]" />
+            <span className="font-headline font-bold text-xs uppercase tracking-[0.22em] text-[#121317]">
+              MONTHLY EDITIONS TIMELINE
+            </span>
+            <span className="font-cursive text-xl text-[#8E7128] hidden sm:inline">
+              The Living Archive
+            </span>
+          </div>
+          <span className="text-[10px] font-sans uppercase tracking-[0.2em] text-[#73757C]">
+            Interactive Folio Timeline &bull; Select Any Issue Below
+          </span>
+        </div>
         
         {/* Desktop / Tablet: Horizontal Accordion Matrix */}
-        <div className="hidden md:flex items-stretch w-full min-h-[500px] lg:min-h-[560px] border-t border-[rgba(15,16,18,0.12)] overflow-hidden">
+        <div className="hidden md:flex items-stretch w-full min-h-[500px] lg:min-h-[560px] overflow-hidden">
           
           {/* First Fixed Column: "Complete Archive" */}
           <button
@@ -245,15 +260,15 @@ export const AccordionTimeline: React.FC<AccordionTimelineProps> = ({
         </div>
 
         {/* Mobile View (<768px): Vertical Stack Accordion */}
-        <div className="md:hidden flex flex-col border-t border-[rgba(15,16,18,0.12)] divide-y divide-[rgba(15,16,18,0.12)]">
+        <div className="md:hidden flex flex-col border-t border-[#121317]/10 divide-y divide-[#121317]/10">
           <div 
             onClick={onOpenArchive}
-            className="p-5 flex items-center justify-between bg-[#EFECE5] cursor-pointer"
+            className="p-3.5 sm:p-5 flex items-center justify-between bg-[#EFECE5] cursor-pointer"
           >
-            <span className="font-sans font-bold text-xs uppercase tracking-widest text-[#0F1012]">
+            <span className="font-sans font-bold text-xs uppercase tracking-widest text-[#121317]">
               All Issues & Complete Archive
             </span>
-            <ArrowUpRight className="w-4 h-4 text-[#0F1012]" />
+            <ArrowUpRight className="w-4 h-4 text-[#8F702D]" />
           </div>
 
           {displayEditions.map((issue) => {
@@ -261,43 +276,43 @@ export const AccordionTimeline: React.FC<AccordionTimelineProps> = ({
             const isCurrent = issue.status === 'current' || (activeIssueId && issue.id === activeIssueId);
 
             return (
-              <div key={issue.id} className="p-5 bg-[#FAF8F3]">
+              <div key={issue.id} className="p-3.5 sm:p-5 bg-[#FAF8F3]">
                 <button
                   onClick={() => setActiveId(isExpanded ? '' : issue.id)}
                   className="w-full flex items-center justify-between text-left focus:outline-none"
                 >
                   <div>
-                    <span className="text-[10px] font-sans text-[#C59E3F] font-bold tracking-wider block uppercase">
+                    <span className="text-[9.5px] font-sans text-[#8F702D] font-bold tracking-wider block uppercase">
                       {issue.monthYear} {isCurrent && '• CURRENT'}
                     </span>
-                    <span className="font-headline font-bold text-base uppercase text-[#0F1012]">
+                    <span className="font-headline font-bold text-sm sm:text-base uppercase text-[#121317]">
                       {issue.title}
                     </span>
                   </div>
-                  <span className="font-mono text-sm text-[#0F1012]/60">
+                  <span className="font-mono text-sm text-[#121317]/60 p-1">
                     {isExpanded ? '−' : '+'}
                   </span>
                 </button>
 
                 {isExpanded && (
-                  <div className="mt-4 pt-4 border-t border-[rgba(15,16,18,0.12)]">
+                  <div className="mt-3 pt-3 border-t border-[#121317]/10">
                     <img 
                       src={issue.id === 'oct-2026' ? '/october-2026-cover.png' : issue.coverImage} 
                       alt={issue.title}
-                      className="w-full h-56 object-cover border border-[rgba(15,16,18,0.15)] mb-3 shadow"
+                      className="w-full h-44 object-cover border border-[#121317]/15 mb-2.5 shadow-sm rounded-xs"
                     />
-                    <p className="text-xs font-editorial italic text-[#0F1012]/80 mt-1">
+                    <p className="text-xs font-editorial italic text-[#121317]/80 mt-1 line-clamp-2">
                       {issue.subtitle}
                     </p>
-                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-[rgba(15,16,18,0.12)]">
-                      <span className="text-[10px] font-sans text-[#0F1012]/60 uppercase">
+                    <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-[#121317]/10">
+                      <span className="text-[10px] font-sans text-[#121317]/60 uppercase">
                         {issue.editor}
                       </span>
                       <div className="flex items-center space-x-2">
                         {(issue.isArchivedUpload || issue.id === 'oct-2026') && onSwitchIssue && issue.id !== activeIssueId && (
                           <button
                             onClick={() => onSwitchIssue(issue.id)}
-                            className="bg-white border border-[#0F1012] text-[#0F1012] text-xs font-bold px-3 py-2 uppercase tracking-wider"
+                            className="bg-white border border-[#121317]/25 text-[#121317] text-xs font-bold px-3 py-1.5 uppercase tracking-wider rounded-xs"
                           >
                             Load Stories
                           </button>
@@ -309,9 +324,9 @@ export const AccordionTimeline: React.FC<AccordionTimelineProps> = ({
                             }
                             onOpenIssueReader(issue.id);
                           }}
-                          className="bg-[#0F1012] text-white text-xs font-bold px-4 py-2 uppercase tracking-wider flex items-center space-x-1.5"
+                          className="bg-[#121317] hover:bg-[#C5A059] hover:text-[#121317] text-[#FAF9F5] text-xs font-bold px-3.5 py-1.5 uppercase tracking-wider flex items-center space-x-1.5 rounded-xs transition-colors shadow-xs"
                         >
-                          <BookOpen className="w-3.5 h-3.5 text-[#C59E3F]" />
+                          <BookOpen className="w-3.5 h-3.5 text-[#C5A059]" />
                           <span>Read Issue</span>
                         </button>
                       </div>

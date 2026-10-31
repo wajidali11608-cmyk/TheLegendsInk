@@ -84,6 +84,24 @@
   font-family: 'Cormorant Garamond', Georgia, serif;
 }
 
+/* Highly Legible Luxury Editorial Cursive */
+.font-cursive {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  letter-spacing: -0.015em;
+}
+
+/* Delicate Calligraphic Script for Accents */
+.font-script {
+  font-family: 'Pinyon Script', cursive;
+  letter-spacing: 0.02em;
+}
+
+.font-italiana {
+  font-family: 'Italiana', serif;
+  letter-spacing: 0.04em;
+}
+
 .font-headline {
   font-family: 'Playfair Display', Georgia, serif;
 }
@@ -99,6 +117,78 @@
 
 .font-editorial-mono {
   font-family: 'JetBrains Mono', monospace;
+}
+
+/* Swiss Bento Micro-Interactions & Editorial Color Harmonies */
+.bento-card {
+  border-radius: 4px;
+  border: 1px solid rgba(18, 19, 23, 0.08);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px -10px rgba(18, 19, 23, 0.09), 0 0 0 1px rgba(180, 130, 60, 0.25);
+}
+
+/* Color Themed Editorial Bento Cards */
+.bento-sand {
+  background-color: #FAF6EF;
+  border-color: rgba(180, 130, 60, 0.18);
+}
+.bento-sand:hover {
+  border-color: rgba(180, 130, 60, 0.45);
+}
+
+.bento-saffron {
+  background-color: #FFFDF5;
+  border-color: rgba(217, 119, 6, 0.22);
+}
+.bento-saffron:hover {
+  border-color: rgba(217, 119, 6, 0.5);
+  box-shadow: 0 20px 35px -10px rgba(217, 119, 6, 0.12), 0 0 0 1px rgba(217, 119, 6, 0.3);
+}
+
+.bento-sage {
+  background-color: #F4F8F5;
+  border-color: rgba(42, 90, 67, 0.18);
+}
+.bento-sage:hover {
+  border-color: rgba(42, 90, 67, 0.45);
+  box-shadow: 0 20px 35px -10px rgba(42, 90, 67, 0.1), 0 0 0 1px rgba(42, 90, 67, 0.25);
+}
+
+.bento-indigo {
+  background-color: #F3F7FC;
+  border-color: rgba(30, 58, 95, 0.18);
+}
+.bento-indigo:hover {
+  border-color: rgba(30, 58, 95, 0.45);
+  box-shadow: 0 20px 35px -10px rgba(30, 58, 95, 0.1), 0 0 0 1px rgba(30, 58, 95, 0.25);
+}
+
+.bento-terracotta {
+  background-color: #FDF6F2;
+  border-color: rgba(168, 66, 43, 0.18);
+}
+.bento-terracotta:hover {
+  border-color: rgba(168, 66, 43, 0.45);
+  box-shadow: 0 20px 35px -10px rgba(168, 66, 43, 0.1), 0 0 0 1px rgba(168, 66, 43, 0.25);
+}
+
+.bento-card-subtle {
+  background-color: #FAF8F4;
+  border: 1px solid rgba(18, 19, 23, 0.06);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card-subtle:hover {
+  background-color: #FFFFFF;
+  transform: translateY(-2px);
+  border-color: rgba(197, 160, 89, 0.4);
+  box-shadow: 0 12px 30px -8px rgba(18, 19, 23, 0.06);
 }
 
 /* Vertical Text Utilities */
@@ -483,4 +573,154 @@
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE RESPONSIVE — Phone-First Optimizations
+   ═══════════════════════════════════════════════════ */
+
+@media (max-width: 639px) {
+  /* Global mobile spacing tightening */
+  body {
+    font-size: 14px;
+  }
+
+  /* Mobile touch targets — minimum 44px */
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+
+  /* Footer compact mobile */
+  footer .grid {
+    gap: 0 !important;
+  }
+
+  /* Compact section padding */
+  section {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Hide decorative non-essential elements */
+  .writing-mode-vertical,
+  .writing-mode-vertical-flipped {
+    display: none !important;
+  }
+
+  /* Tighten bento card padding for mobile */
+  .bento-card {
+    padding: 16px !important;
+  }
+
+  .bento-card:hover {
+    transform: none;
+  }
+
+  /* Disable hover lifts on touch */
+  .card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Drop cap smaller on mobile */
+  .drop-cap::first-letter {
+    font-size: 3.5rem;
+    padding-right: 8px;
+  }
+
+  /* Smoother scrolling on mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Line clamp utility tighter */
+  .line-clamp-3 {
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* Tablet breakpoint refinements */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .bento-card {
+    padding: 20px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   CMS PORTAL — Warm Light Editorial Theme
+   ═══════════════════════════════════════════════════ */
+
+.cms-portal {
+  background-color: #FAF9F5;
+  color: #121317;
+}
+
+.cms-portal-header {
+  background-color: #F5F2EA;
+  border-bottom: 1px solid rgba(18, 19, 23, 0.1);
+}
+
+.cms-portal-nav {
+  background-color: #FAF8F3;
+  border-bottom: 1px solid rgba(18, 19, 23, 0.08);
+}
+
+.cms-portal-card {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(18, 19, 23, 0.1);
+  border-radius: 4px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cms-portal-card:hover {
+  border-color: rgba(197, 158, 63, 0.45);
+  box-shadow: 0 8px 24px -8px rgba(18, 19, 23, 0.08);
+}
+
+.cms-portal-input {
+  background-color: #FAF9F5;
+  border: 1px solid rgba(18, 19, 23, 0.15);
+  color: #121317;
+  font-size: 13px;
+  padding: 10px 14px;
+  transition: border-color 0.2s ease;
+}
+
+.cms-portal-input:focus {
+  outline: none;
+  border-color: #C59E3F;
+  box-shadow: 0 0 0 3px rgba(197, 158, 63, 0.12);
+}
+
+.cms-portal-input::placeholder {
+  color: rgba(18, 19, 23, 0.4);
+}
+
+.cms-portal-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+.cms-portal-badge-gold {
+  background-color: rgba(197, 158, 63, 0.12);
+  color: #8F702D;
+  border: 1px solid rgba(197, 158, 63, 0.3);
+}
+
+.cms-portal-badge-green {
+  background-color: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.cms-portal-badge-amber {
+  background-color: rgba(217, 119, 6, 0.08);
+  color: #B45309;
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }

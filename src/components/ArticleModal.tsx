@@ -4,12 +4,14 @@ import { Article, ARTICLES } from '../data/magazineContent';
 
 interface ArticleModalProps {
   article: Article | null;
+  allArticles?: Article[];
   onClose: () => void;
   onSelectArticle: (slug: string) => void;
 }
 
 export const ArticleModal: React.FC<ArticleModalProps> = ({
   article,
+  allArticles,
   onClose,
   onSelectArticle,
 }) => {
@@ -40,7 +42,8 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
 
   if (!article) return null;
 
-  const related = ARTICLES.filter(a => a.id !== article.id).slice(0, 3);
+  const articleList = allArticles && allArticles.length > 0 ? allArticles : ARTICLES;
+  const related = articleList.filter(a => a.id !== article.id).slice(0, 3);
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -88,7 +91,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               <button
                 onClick={() => setIsPlayingAudio(!isPlayingAudio)}
                 title={isPlayingAudio ? "Pause Audio Summary" : "Listen to Article"}
-                className={`flex items-center space-x-1.5 text-xs font-editorial-mono px-3 py-1 border transition-all duration-300 ${
+                className={`flex items-center space-x-1.5 text-xs font-editorial-mono px-2 sm:px-3 py-1 border transition-all duration-300 ${
                   isPlayingAudio 
                     ? 'bg-accent-gold text-ink border-accent-gold font-bold shadow-md' 
                     : isDarkTheme ? 'border-white/20 hover:border-accent-gold hover:text-accent-gold' : 'border-ink/20 hover:border-accent-gold hover:text-accent-gold'
@@ -96,7 +99,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               >
                 {isPlayingAudio ? (
                   <>
-                    <span className="w-2 h-2 rounded-full bg-ink animate-ping mr-0.5" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-ink animate-ping" />
                     <VolumeX className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Playing</span>
                   </>
@@ -108,8 +111,8 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                 )}
               </button>
 
-              {/* Font Size Toggle */}
-              <div className="flex items-center space-x-1 text-xs font-editorial-mono border border-current/20 px-2 py-0.5">
+              {/* Font Size Toggle (Desktop & Tablet) */}
+              <div className="hidden sm:flex items-center space-x-1 text-xs font-editorial-mono border border-current/20 px-2 py-0.5">
                 <button 
                   onClick={() => setFontSize('sm')}
                   className={`px-1 hover:text-accent-gold transition-colors ${fontSize === 'sm' ? 'font-black underline text-accent-gold' : ''}`}
@@ -134,16 +137,16 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               <button
                 onClick={() => setIsDarkTheme(!isDarkTheme)}
                 title="Toggle Reading Mode"
-                className="text-xs font-editorial-mono px-2.5 py-1 border border-current/20 hover:border-accent-gold hover:text-accent-gold uppercase transition-colors"
+                className="text-[11px] sm:text-xs font-editorial-mono px-2 sm:px-2.5 py-1 border border-current/20 hover:border-accent-gold hover:text-accent-gold uppercase transition-colors"
               >
-                {isDarkTheme ? 'Day Mode' : 'Night Mode'}
+                {isDarkTheme ? 'Day' : 'Night'}
               </button>
 
-              {/* Bookmark Save */}
+              {/* Bookmark Save (Desktop & Tablet) */}
               <button
                 onClick={() => setIsSaved(!isSaved)}
                 title={isSaved ? "Article Saved" : "Save Article"}
-                className="p-1.5 hover:text-accent-gold transition-colors"
+                className="hidden sm:block p-1.5 hover:text-accent-gold transition-colors"
               >
                 <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-accent-gold text-accent-gold' : ''}`} />
               </button>
@@ -169,11 +172,11 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
         </div>
 
         {/* Article Body Container */}
-        <article className="max-w-4xl mx-auto px-6 md:px-10 py-12 md:py-20">
+        <article className="max-w-4xl mx-auto px-4 sm:px-6 md:px-10 py-6 sm:py-12 md:py-20">
           
           {/* Metadata Header */}
-          <div className="flex flex-wrap items-center gap-2 text-[11px] font-editorial-mono tracking-[0.25em] uppercase text-accent-gold font-bold">
-            <span className="bg-accent-gold/10 px-2.5 py-0.5 border border-accent-gold/20">{article.category}</span>
+          <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-editorial-mono tracking-[0.2em] sm:tracking-[0.25em] uppercase text-accent-gold font-bold">
+            <span className="bg-accent-gold/10 px-2 py-0.5 border border-accent-gold/20">{article.category}</span>
             <span>•</span>
             <span>{article.readTime}</span>
             <span>•</span>
@@ -181,7 +184,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
           </div>
 
           {/* Headline */}
-          <h1 className="mt-6 font-headline font-black text-3xl sm:text-5xl lg:text-6xl tracking-tight leading-[0.98] uppercase">
+          <h1 className="mt-4 sm:mt-6 font-headline font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.05] uppercase">
             {article.title}
           </h1>
 
