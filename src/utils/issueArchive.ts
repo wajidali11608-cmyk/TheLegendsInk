@@ -2,7 +2,7 @@
 // Stores every uploaded magazine PDF & its extracted articles in IndexedDB
 // so that switching between months (e.g. October, November) preserves the full archive.
 
-import { Article, ARTICLES } from '../data/magazineContent';
+import { Article, NOVEMBER_ARTICLES, OCTOBER_ARTICLES } from '../data/magazineContent';
 import { fetchLiveActiveIssueFromRemote, fetchLiveArchivedIssuesFeed } from './liveSyncService';
 
 const DB_NAME = 'magzine_portal_db';
@@ -12,7 +12,7 @@ const META_STORE = 'issue_archive_meta';
 const ACTIVE_KEY = 'active_issue_id';
 
 export interface ArchivedIssue {
-  /** Unique key — e.g. "oct-2026", "issue-1698012345678" */
+  /** Unique key — e.g. "oct-2026", "nov-2026", "issue-1698012345678" */
   id: string;
   /** Display month/year — e.g. "November 2026", "October 2026" */
   monthYear: string;
@@ -38,7 +38,20 @@ interface ArchivedIssueRecord extends ArchivedIssue {
   pdfType: string;
 }
 
+export const DEFAULT_NOVEMBER_ID = 'nov-2026';
 export const DEFAULT_OCTOBER_ID = 'oct-2026';
+
+export const DEFAULT_NOVEMBER_ISSUE: ArchivedIssue = {
+  id: DEFAULT_NOVEMBER_ID,
+  monthYear: 'November 2026',
+  title: 'The Legends Ink — November 2026',
+  issueLabel: 'VOL. 01 • ISSUE 04 • NOVEMBER 2026',
+  fileName: 'tli-november-2026.pdf',
+  coverImage: '/november-2026-cover.png',
+  pageCount: 32,
+  uploadedAt: '2026-11-01T00:00:00.000Z',
+  articles: NOVEMBER_ARTICLES,
+};
 
 export const DEFAULT_OCTOBER_ISSUE: ArchivedIssue = {
   id: DEFAULT_OCTOBER_ID,
@@ -49,7 +62,7 @@ export const DEFAULT_OCTOBER_ISSUE: ArchivedIssue = {
   coverImage: '/october-2026-cover.png',
   pageCount: 68,
   uploadedAt: '2026-10-16T00:00:00.000Z',
-  articles: ARTICLES,
+  articles: OCTOBER_ARTICLES,
 };
 
 // ─── IndexedDB helpers ────────────────────────────────────
@@ -182,6 +195,7 @@ export async function listArchivedIssues(): Promise<ArchivedIssue[]> {
     // Merge unique issues by id or title
     const issueMap = new Map<string, ArchivedIssue>();
     issueMap.set(DEFAULT_OCTOBER_ID, DEFAULT_OCTOBER_ISSUE);
+    issueMap.set(DEFAULT_NOVEMBER_ID, DEFAULT_NOVEMBER_ISSUE);
 
     remoteFeed.forEach((item) => {
       if (item && item.id) issueMap.set(item.id, item);
@@ -194,7 +208,7 @@ export async function listArchivedIssues(): Promise<ArchivedIssue[]> {
     const combined = Array.from(issueMap.values());
     return combined.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
   } catch {
-    return [DEFAULT_OCTOBER_ISSUE];
+    return [DEFAULT_NOVEMBER_ISSUE, DEFAULT_OCTOBER_ISSUE];
   }
 }
 
@@ -211,6 +225,8 @@ export async function loadIssueFromArchive(
       if (foundRemote) {
         const url = foundRemote.fileName?.startsWith('http')
           ? foundRemote.fileName
+          : foundRemote.fileName?.startsWith('/')
+          ? foundRemote.fileName
           : `/issues/${foundRemote.fileName || 'current-issue.pdf'}`;
         return { issue: foundRemote, blobUrl: url };
       }
@@ -218,7 +234,34 @@ export async function loadIssueFromArchive(
       // ignore
     }
 
-    // If it's the baseline October issue, check if custom record exists first; otherwise return default
+    // If it's the baseline November issue
+    if (id === DEFAULT_NOVEMBER_ID) {
+      try {
+        const db = await openDB();
+        const customRecord = await new Promise<ArchivedIssueRecord | undefined>((resolve, reject) => {
+          const tx = db.transaction(ISSUES_STORE, 'readonly');
+          const store = tx.objectStore(ISSUES_STORE);
+          const req = store.get(DEFAULT_NOVEMBER_ID);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+
+        if (customRecord && customRecord.pdfBuffer) {
+          const blob = new Blob([customRecord.pdfBuffer], { type: customRecord.pdfType || 'application/pdf' });
+          const { pdfBuffer: _buf, pdfType: _type, ...meta } = customRecord;
+          return { issue: meta, blobUrl: URL.createObjectURL(blob) };
+        }
+      } catch {
+        // proceed to default
+      }
+
+      return {
+        issue: DEFAULT_NOVEMBER_ISSUE,
+        blobUrl: '/tli-november-2026.pdf',
+      };
+    }
+
+    // If it's the baseline October issue
     if (id === DEFAULT_OCTOBER_ID) {
       try {
         const db = await openDB();
@@ -255,10 +298,10 @@ export async function loadIssueFromArchive(
     });
 
     if (!record || !record.pdfBuffer) {
-      // Fallback to baseline October if record not found
+      // Fallback to baseline November if record not found
       return {
-        issue: DEFAULT_OCTOBER_ISSUE,
-        blobUrl: '/tli-october-2026.pdf',
+        issue: DEFAULT_NOVEMBER_ISSUE,
+        blobUrl: '/tli-november-2026.pdf',
       };
     }
 
@@ -269,8 +312,8 @@ export async function loadIssueFromArchive(
     return { issue: meta, blobUrl };
   } catch {
     return {
-      issue: DEFAULT_OCTOBER_ISSUE,
-      blobUrl: '/tli-october-2026.pdf',
+      issue: DEFAULT_NOVEMBER_ISSUE,
+      blobUrl: '/tli-november-2026.pdf',
     };
   }
 }
@@ -281,18 +324,13 @@ export async function loadActiveIssue(): Promise<{
   issue: ArchivedIssue;
   blobUrl: string;
 } | null> {
-  // 1. Check if user explicitly selected a local issue in this browser
-  const activeId = await getActiveIssueId();
-  if (activeId && activeId !== DEFAULT_OCTOBER_ID) {
-    const loaded = await loadIssueFromArchive(activeId);
-    if (loaded) return loaded;
-  }
-
-  // 2. Check remote active issue (published to live site)
+  // 1. Check remote active issue (published to live site)
   try {
     const remoteActive = await fetchLiveActiveIssueFromRemote();
     if (remoteActive) {
       const remotePdfUrl = remoteActive.fileName?.startsWith('http')
+        ? remoteActive.fileName
+        : remoteActive.fileName?.startsWith('/')
         ? remoteActive.fileName
         : `/issues/${remoteActive.fileName || 'active-issue.pdf'}`;
       return {
@@ -304,7 +342,14 @@ export async function loadActiveIssue(): Promise<{
     // proceed
   }
 
-  // 3. If no active issue set yet, check if there are any locally uploaded issues
+  // 2. Check if user explicitly selected a local issue in this browser
+  const activeId = await getActiveIssueId();
+  if (activeId) {
+    const loaded = await loadIssueFromArchive(activeId);
+    if (loaded) return loaded;
+  }
+
+  // 3. Check if there are any locally uploaded issues in IDB
   try {
     const db = await openDB();
     const records = await new Promise<ArchivedIssueRecord[]>((resolve, reject) => {
@@ -327,18 +372,18 @@ export async function loadActiveIssue(): Promise<{
     // fallback below
   }
 
-  // 4. Baseline default: October 2026
+  // 4. Baseline default: November 2026
   return {
-    issue: DEFAULT_OCTOBER_ISSUE,
-    blobUrl: '/tli-october-2026.pdf',
+    issue: DEFAULT_NOVEMBER_ISSUE,
+    blobUrl: '/tli-november-2026.pdf',
   };
 }
 
 // ─── Delete an issue from the archive ─────────────────────
 
 export async function deleteIssueFromArchive(id: string): Promise<void> {
-  if (id === DEFAULT_OCTOBER_ID) {
-    // Baseline October cannot be permanently wiped, but can be reset
+  if (id === DEFAULT_NOVEMBER_ID || id === DEFAULT_OCTOBER_ID) {
+    // Baseline issues cannot be permanently wiped
     return;
   }
   const db = await openDB();
@@ -350,10 +395,10 @@ export async function deleteIssueFromArchive(id: string): Promise<void> {
     req.onerror = () => reject(req.error);
   });
 
-  // If the deleted issue was active, revert to October
+  // If the deleted issue was active, revert to November
   const activeId = await getActiveIssueId();
   if (activeId === id) {
-    await setActiveIssueId(DEFAULT_OCTOBER_ID);
+    await setActiveIssueId(DEFAULT_NOVEMBER_ID);
   }
 }
 
@@ -368,5 +413,5 @@ export async function clearIssueArchive(): Promise<void> {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
-  await setActiveIssueId(DEFAULT_OCTOBER_ID);
+  await setActiveIssueId(DEFAULT_NOVEMBER_ID);
 }

@@ -255,6 +255,83 @@ export async function publishToGitHubRepo(
 }
 
 /**
+ * Universal publication dispatcher:
+ * 1. Calls local dev server API (/api/cms/publish) to write directly into public/ directory on disk
+ * 2. If GitHub token is present, commits directly to GitHub repo
+ * 3. Returns a unified status report
+ */
+export async function publishIssueGlobally(
+  issue: ArchivedIssue,
+  pdfFile?: File | Blob,
+  onProgress?: (status: string) => void
+): Promise<{ success: boolean; message: string; localSaved?: boolean; gitHubSaved?: boolean }> {
+  let localSaved = false;
+  let gitHubSaved = false;
+  const messages: string[] = [];
+
+  // 1. Try local dev server API first (instant write to disk in workspace)
+  try {
+    onProgress?.('Syncing with local publication directory...');
+    let pdfBase64: string | undefined;
+    if (pdfFile && pdfFile.size < 35 * 1024 * 1024) {
+      const buf = await pdfFile.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      pdfBase64 = btoa(binary);
+    }
+
+    const localRes = await fetch('/api/cms/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        issue,
+        fileName: issue.fileName,
+        pdfBase64,
+      }),
+    });
+
+    if (localRes.ok) {
+      localSaved = true;
+      messages.push('Saved directly to project files (active-issue.json & issues-feed.json)');
+    }
+  } catch (err) {
+    console.log('Local dev server publish skipped:', err);
+  }
+
+  // 2. Try GitHub sync if token configured
+  const config = getCloudSyncConfig();
+  if (config.githubToken && config.githubToken.trim()) {
+    onProgress?.('Deploying to GitHub repository...');
+    const ghRes = await publishToGitHubRepo(issue, pdfFile, onProgress);
+    if (ghRes.success) {
+      gitHubSaved = true;
+      messages.push(ghRes.message);
+    } else {
+      messages.push(`GitHub sync note: ${ghRes.message}`);
+    }
+  }
+
+  if (localSaved || gitHubSaved) {
+    return {
+      success: true,
+      message: `Published! ${messages.join(' • ')}`,
+      localSaved,
+      gitHubSaved,
+    };
+  }
+
+  return {
+    success: true,
+    message: `Issue saved to local browser database. To make it visible to all visitors across devices, configure your GitHub Token in CMS Settings or download the publication feed bundle.`,
+    localSaved: false,
+    gitHubSaved: false,
+  };
+}
+
+/**
  * Generate a downloadable live publication bundle (.json) so the user
  * can save it into the repository with zero configuration.
  */
@@ -265,6 +342,22 @@ export function exportLivePublicationBundle(issue: ArchivedIssue): void {
   const a = document.createElement('a');
   a.href = url;
   a.download = `active-issue.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Download the full issues-feed.json bundle including all archived issues
+ */
+export function exportIssuesFeedBundle(issues: ArchivedIssue[]): void {
+  const jsonStr = JSON.stringify(issues, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `issues-feed.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

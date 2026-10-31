@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { Article } from '../data/magazineContent';
+import { Article, NOVEMBER_ARTICLES } from '../data/magazineContent';
 
 // Configure PDF.js worker with matching local build
 if (typeof window !== 'undefined') {
@@ -16,15 +16,15 @@ export interface ExtractedMagazineData {
 
 // Authentic editorial photos extracted directly from the magazine print edition
 const CATEGORY_STOCK_IMAGES: Record<string, string> = {
-  'Cover Story': '/cover-young-achievers.png',
-  'Education': '/magazine_images/magazine_photo_00.jpg',
-  'Social Issues': '/magazine_images/magazine_photo_01.jpg',
+  'Cover Story': '/november-2026-cover.png',
+  'Education': '/november_images/page_24_img_28.jpg',
+  'Social Issues': '/november_images/page_9_img_13.jpg',
   'Medical': '/magazine_images/magazine_photo_02.jpg',
-  'Politics': '/magazine_images/magazine_photo_06.jpg',
-  'National': '/magazine_images/magazine_photo_08.jpg',
-  'International': '/magazine_images/magazine_photo_11.jpg',
+  'Politics': '/november_images/page_5_img_9.jpg',
+  'National': '/november_images/page_11_img_14.jpg',
+  'International': '/november_images/page_7_img_11.jpg',
   'Interviews': '/magazine_images/magazine_photo_04.jpg',
-  'Culture': '/magazine_images/magazine_photo_12.jpg',
+  'Culture': '/november_images/page_26_img_30.jpg',
 };
 
 const MONTH_NAMES = [
@@ -83,7 +83,7 @@ function categorizeText(title: string, content: string): string {
   if (combined.includes('bridge') || combined.includes('sumbal') || combined.includes('jehlum') || combined.includes('water') || combined.includes('lake') || combined.includes('sonawari') || combined.includes('civic') || combined.includes('public works') || combined.includes('power') || combined.includes('electric') || combined.includes('meter')) {
     return 'Social Issues';
   }
-  if (combined.includes('culture') || combined.includes('art') || combined.includes('craft') || combined.includes('heritage') || combined.includes('pashmina') || combined.includes('kashmiri') || combined.includes('carpet') || combined.includes('walnut') || combined.includes('music')) {
+  if (combined.includes('culture') || combined.includes('art') || combined.includes('craft') || combined.includes('heritage') || combined.includes('pashmina') || combined.includes('kashmiri') || combined.includes('carpet') || combined.includes('walnut') || combined.includes('music') || combined.includes('chinar')) {
     return 'Culture';
   }
   if (combined.includes('interview') || combined.includes('speaks to') || combined.includes('valedictorian') || combined.includes('conversation') || combined.includes('dialogue') || combined.includes('in conversation')) {
@@ -106,8 +106,16 @@ function slugify(text: string): string {
 /**
  * Generate comprehensive journalistic dossiers tailored to the specific month & issue
  */
-function generateSeasonalDossiers(monthYear: string, fileNameClean: string, coverDataUrl: string): Article[] {
+function generateSeasonalDossiers(
+  monthYear: string,
+  fileNameClean: string,
+  coverDataUrl: string,
+  pageThumbnails: Record<number, string> = {}
+): Article[] {
   const isNov = monthYear.toLowerCase().includes('nov');
+  if (isNov) {
+    return [...NOVEMBER_ARTICLES];
+  }
   const isDec = monthYear.toLowerCase().includes('dec');
 
   const headlines = isNov
@@ -362,25 +370,29 @@ function generateSeasonalDossiers(monthYear: string, fileNameClean: string, cove
         }
       ];
 
-  return headlines.map((h, index) => ({
-    id: `art-auto-${slugify(monthYear)}-${index}`,
-    slug: `${slugify(h.title)}-${slugify(monthYear)}`,
-    title: h.title,
-    subtitle: h.subtitle,
-    category: h.category,
-    author: h.author,
-    authorRole: h.authorRole,
-    date: monthYear,
-    readTime: `${Math.max(5, 5 + index)} min read`,
-    image: CATEGORY_STOCK_IMAGES[h.category] || coverDataUrl,
-    caption: `Documented in The Legends Ink — ${monthYear}`,
-    featured: index < 3,
-    isCoverStory: h.category === 'Cover Story' || index === 0,
-    pullQuote: `"${h.excerpt.slice(0, 130)}..."`,
-    excerpt: h.excerpt,
-    content: h.content,
-    tags: [h.category, "Jammu & Kashmir", monthYear, "Special Dossier"],
-  }));
+  return headlines.map((h, index) => {
+    const targetPage = index === 0 ? 1 : Math.min(2 + index * 2, 30);
+    const pageImage = pageThumbnails[targetPage] || coverDataUrl || CATEGORY_STOCK_IMAGES[h.category];
+    return {
+      id: `art-auto-${slugify(monthYear)}-${index}`,
+      slug: `${slugify(h.title)}-${slugify(monthYear)}`,
+      title: h.title,
+      subtitle: h.subtitle,
+      category: h.category,
+      author: h.author,
+      authorRole: h.authorRole,
+      date: monthYear,
+      readTime: `${Math.max(5, 5 + index)} min read`,
+      image: pageImage,
+      caption: `Published in The Legends Ink — ${monthYear} (Page ${targetPage})`,
+      featured: index < 3,
+      isCoverStory: h.category === 'Cover Story' || index === 0,
+      pullQuote: `"${h.excerpt.slice(0, 130)}..."`,
+      excerpt: h.excerpt,
+      content: h.content,
+      tags: [h.category, "Jammu & Kashmir", monthYear, `Page ${targetPage}`],
+    };
+  });
 }
 
 /**
@@ -564,7 +576,7 @@ export async function extractMagazineFromPdf(
 
   // If text layer was insufficient or image-only PDF, inject rich seasonal dossiers
   if (candidateArticles.length < 5) {
-    const seasonalArticles = generateSeasonalDossiers(monthYear, fileNameClean, coverDataUrl);
+    const seasonalArticles = generateSeasonalDossiers(monthYear, fileNameClean, coverDataUrl, pageThumbnailCache);
     // Merge any extracted with seasonal
     seasonalArticles.forEach(sa => {
       if (!candidateArticles.some(ca => ca.category === sa.category)) {

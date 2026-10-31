@@ -22,6 +22,7 @@ import { Article, MAGAZINE_DETAILS } from './data/magazineContent';
 import { getInitialArticles, saveArticlesToCMS } from './utils/cmsStorage';
 import {
   ArchivedIssue,
+  DEFAULT_NOVEMBER_ISSUE,
   DEFAULT_OCTOBER_ISSUE,
   listArchivedIssues,
   loadActiveIssue,
@@ -29,8 +30,9 @@ import {
   setActiveIssueId,
   saveIssueToArchive,
 } from './utils/issueArchive';
+import { publishIssueGlobally } from './utils/liveSyncService';
 
-const DEFAULT_PDF_URL = '/tli-october-2026.pdf';
+const DEFAULT_PDF_URL = '/tli-november-2026.pdf';
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState<string>('Home');
@@ -47,9 +49,9 @@ export default function App() {
   // Active Magazine PDF state
   const [activePdfUrl, setActivePdfUrl] = useState<string>(DEFAULT_PDF_URL);
 
-  // Multi-issue archive state
-  const [archivedIssues, setArchivedIssues] = useState<ArchivedIssue[]>([DEFAULT_OCTOBER_ISSUE]);
-  const [activeIssue, setActiveIssue] = useState<ArchivedIssue | null>(DEFAULT_OCTOBER_ISSUE);
+  // Multi-issue archive state (defaults to November 2026 with October in archive)
+  const [archivedIssues, setArchivedIssues] = useState<ArchivedIssue[]>([DEFAULT_NOVEMBER_ISSUE, DEFAULT_OCTOBER_ISSUE]);
+  const [activeIssue, setActiveIssue] = useState<ArchivedIssue | null>(DEFAULT_NOVEMBER_ISSUE);
 
   // Refresh the list of archived issues from IndexedDB
   const refreshArchive = useCallback(async () => {
@@ -57,7 +59,7 @@ export default function App() {
     setArchivedIssues(issues);
   }, []);
 
-  // On mount: load archived issues list & restore the active issue (defaulting to October 2026)
+  // On mount: load archived issues list & restore the active issue (defaulting to November 2026)
   useEffect(() => {
     (async () => {
       await refreshArchive();
@@ -74,7 +76,7 @@ export default function App() {
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Switch to a different archived issue (e.g. October -> November, or November -> October)
+  // Switch to a different archived issue (e.g. November -> October, or October -> November)
   const handleSwitchIssue = useCallback(async (issueId: string) => {
     const result = await loadIssueFromArchive(issueId);
     if (result) {
@@ -89,7 +91,7 @@ export default function App() {
     }
   }, [refreshArchive]);
 
-  // When CMS publishes a new issue: save to archive, update state
+  // When CMS publishes a new issue: save to archive, write to project disk, and sync to GitHub
   const handleCMSPublishIssue = useCallback(async (
     _pdfUrl: string,
     meta: { title: string; issueLabel: string; pageCount: number; coverImage?: string },
@@ -106,7 +108,7 @@ export default function App() {
         title: meta.title,
         issueLabel: meta.issueLabel,
         monthYear: cleanMonthYear,
-        coverImage: meta.coverImage || '/october-2026-cover.png',
+        coverImage: meta.coverImage || '/november-2026-cover.png',
         pageCount: meta.pageCount,
         articles: extractedArticles,
       });
@@ -118,7 +120,7 @@ export default function App() {
         title: meta.title,
         issueLabel: meta.issueLabel,
         fileName: file.name,
-        coverImage: meta.coverImage || '/october-2026-cover.png',
+        coverImage: meta.coverImage || '/november-2026-cover.png',
         pageCount: meta.pageCount,
         uploadedAt: new Date().toISOString(),
         articles: extractedArticles,
@@ -126,6 +128,14 @@ export default function App() {
       setActiveIssue(newIssueRecord);
       setArticles(extractedArticles);
       saveArticlesToCMS(extractedArticles);
+
+      // Automatically publish globally (writes to project files via local dev server and syncs to GitHub)
+      try {
+        await publishIssueGlobally(newIssueRecord, file);
+      } catch (syncErr) {
+        console.warn('Global publish sync warning:', syncErr);
+      }
+
       await refreshArchive();
     } else {
       // Fallback for non-file publish (just PDF url update)

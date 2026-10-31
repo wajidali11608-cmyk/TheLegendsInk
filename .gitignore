@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# Helper scripts
+scripts/
+
 # Environment variables
 .env
 .env.local
